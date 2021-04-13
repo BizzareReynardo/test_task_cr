@@ -1,0 +1,44 @@
+﻿@model WebApplication4.Models.Imag
+@{Html.EnableClientValidation();}
+@{Html.EnableUnobtrusiveJavaScript();}
+<div class="modal-content">
+    <div class="modal-header">
+        <button class="close" data-dismiss="modal" area-hidden="true">X</button>
+        <h4>Новое изображение</h4>
+    </div>
+    <div class="modal-body">
+        @using (Html.BeginForm("AddImage", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            
+            @Html.LabelFor(model => model.FileName, "Название изображения")
+            <br/>
+            @Html.EditorFor(model => model.FileName)
+            @Html.ValidationMessageFor(model => model.FileName)
+            <br/><br/>
+           
+            @Html.LabelFor(model => model.Author, "Имя автора")
+            <br/>
+            @Html.EditorFor(model => model.Author)
+            @Html.ValidationMessageFor(model => model.Author)
+            <br/><br/>
+            @Html.LabelFor(model => model.Cmnt, "Комментарий")
+            <br/>
+            @Html.EditorFor(model => model.Cmnt)
+            <br/><br/>
+            @Html.LabelFor(model => model.File, "Изображение")
+            <br/>
+            <input type="file" name="neededFile" required id="neededFile" accept="image/jpeg,image/png,image/gif" />
+
+            <br/><br/>
+            <input type="submit" value="Добавить" />
+        }
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //Вставка для добавления проверки заполненности полей без перегрузки страницы
+        $("input[name=FileName]").attr('required', 'required');
+        $("input[name=Author]").attr('required', 'required');
+    });
+</script>

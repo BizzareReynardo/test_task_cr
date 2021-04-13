@@ -1,0 +1,137 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+    //Основное представление веб-приложения
+}
+
+
+
+    <div id="modDialog" class="modal fade">
+        <div id="dialogContent" class="modal-dialog"></div>
+    </div>
+
+    <div class="container">
+
+        <h1>Тестовое задание</h1>
+        <h3>Выполнил: Ставцев Никита.</h3>
+        @if (ViewBag.ErrorMessage != null)
+        {
+            //Проверка на наличие ссобщения об ошибке
+            <h4>@ViewBag.ErrorMessage</h4>
+            <a href="/Home/Index/">Вернуться на главную</a>
+        }
+    @using (Html.BeginForm("Index", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        //Внутри формы формируется таблица с информацией об изображениях
+        <table class="result_test">
+            <thead>
+                <tr>
+                    <th>Номер</th>
+                    <th>Имя</th>
+                    <th>Дата создания</th>
+                    <th>Автор</th>
+                    <th>Комментарий</th>
+                    <th>Предварительный просмотр</th>
+                </tr>
+            </thead><tbody>
+    @if (ViewBag.Images != null)
+    {
+        //Во избежание ошибок идёт проверка на наличие изображений в БД изображений
+        foreach (var b in ViewBag.Images)
+        {
+            //Заполнение таблицы данные из ViewBag.Images
+        <tr>
+            <td>@b.Id</td>
+            <td>@b.FileName</td>
+            <td>@b.FileDateTime</td>
+            <td>@b.Author</td>
+            <td>
+            @if(b.Cmnt != null){
+                //Вывод кнопки "Комментарий" при наличии комментария к изображению
+                @Html.ActionLink("Комментарий", "FullComment", new { id = b.Id }, new { @class = "commentRead" })
+            }
+            </td>
+            <td>
+            @Html.CheckBox("Enable", false)</td>
+            <!--<img src="data:image;base64,Convert.ToBase64String(b.File)" alt="Alternate Text" />-->
+        </tr>
+    
+        }
+    }
+</tbody></table>
+        <input type="submit" disabled id="gallery_button" value="Просмотреть галерею" />
+        <input type="hidden" name="checked_images" id="checked_images" value=""/>
+    }
+        @Html.ActionLink("Добавить", "AddImage", null, new { @class = "addImage"})
+    </div>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    
+
+        <script type="text/javascript">
+
+            var form_adder = 0;
+
+            $(function () {
+               
+
+                $("input[type=checkbox]").on('change', function () {
+                    //Проверка наличия включённый чекбоксов, чтобы у клиента не было возможности перейти в галерею без выбранных изображений
+                    var ids = ''; //код проверки
+                    $("input[type=checkbox]").each(function (index, value) {
+                        if ($(this).is(':checked')) {
+                            ids += '1';
+                        } else {
+                            ids += '0';
+                        }
+                    });
+                    if (ids.indexOf('1') == -1) { //Если в получившейся строке отсутствуют 1, что отвечает отмеченным checkbox'ам
+                        $("#gallery_button").attr('disabled', 'disabled'); //деактивируем кнопку просмотра галереи
+                    } else {
+                        $("#gallery_button").attr('disabled', false); //иначе включаем её
+                    }
+                });
+
+                //Предварительный обработчик отправки формы перехода в галерею
+                $(".result_test").parent().on('submit', function (e) {
+                    if ($("#checked_images").val() == '') {
+                        var ids = '';
+                        $(this).find("input[type=checkbox]").each(function (index, value) {
+                            //Проверка истинности чекбоксов для формирования значения переменной для обработки в контроллере
+                            if ($(this).is(':checked')) {
+                                ids += '1';
+                            } else {
+                                ids += '0';
+                            }
+                        });
+                        $("#checked_images").val(ids); //место хранения строки со значениями истинности checkbox'ов
+                    }
+                    
+                    
+                });
+
+                $(".result_test").tablesorter(); //подключение сортировщика в таблицу вывода данных об изображениях
+                $.ajaxSetup({ cache: false }); //правки настроек Ajax
+                $(".commentRead").click(function (e) {
+
+                    e.preventDefault(); //первым делом при клике на ссылку "Комментарий" мы отключаем базовый обработчик, чтобы не было переходов на другую страницу
+                    $.get(this.href, function (data) {
+                        //Здесь идёт Ajax-вызов контроллера FullComment из файла HomeController
+                        $('#dialogContent').html(data); //заполяем полученными данными класс модального окна
+                        $('#modDialog').modal('show'); //вызываем это самое модальное окно
+                    });
+                });
+                $(".addImage").click(function (e) {
+
+                    e.preventDefault(); //первым делом при клике на ссылку "Добавить" мы отключаем базовый обработчик, чтобы не было переходов на другую страницу
+                    $.get(this.href, function (data) {
+                        //То же самое, что и для случая с комментарием
+                        $('#dialogContent').html(data);
+                        $('#modDialog').modal('show');
+                    });
+                });
+
+            })
+        </script>
+
+</body>
+</html>

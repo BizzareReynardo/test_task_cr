@@ -1,0 +1,12 @@
+﻿
+@{
+    ViewBag.Title = "Gallery";
+}
+
+<h2>Gallery</h2>
+@foreach (var b in ViewBag.Images)
+{
+    <img src="data:image;base64,@System.Convert.ToBase64String(b.File)" class="img-tests"/>
+}
+<a href="/Home/Index/">Вернуться на главную</a>
+
